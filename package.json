@@ -4,24 +4,16 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"HOST=localhost PORT=1234 npx y-websocket\" --kill-others",
-    "dev:win": "concurrently \"vite\" \"set HOST=localhost&& set PORT=1234 && npx y-websocket\" --kill-others",
+    "dev": "vite",
     "build": "tsc && vite build --base=./",
-    "preview": "vite preview",
-    "lint": "yarn dlx @biomejs/biome check --apply src",
-    "deploy": "yarn build && npx partykit deploy"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@dimforge/rapier2d": "^0.11.2",
     "@tldraw/tldraw": "2.0.0-beta.2",
-    "partykit": "^0.0.27",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "webcola": "latest",
-    "y-partykit": "^0.0.7",
-    "y-utility": "^0.1.3",
-    "y-websocket": "^1.5.0",
-    "yjs": "^13.6.8"
+    "webcola": "latest"
   },
   "devDependencies": {
     "@biomejs/biome": "1.4.1",
