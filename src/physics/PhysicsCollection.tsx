@@ -31,7 +31,7 @@ export class PhysicsCollection extends BaseCollection {
   private world: RAPIER.World;
   private rigidbodyLookup: Map<TLShapeId, RAPIER.RigidBody>;
   private colliderLookup: Map<TLShapeId, RAPIER.Collider>;
-  private kinematicSet: Set<TLShapeId>;
+  private exogenousShapes: Set<TLShapeId>;
   private characterLookup: Map<TLShapeId, { controller: RAPIER.KinematicCharacterController, id: TLShapeId }>;
   private animFrame = -1; // Store the animation frame id
 
@@ -41,14 +41,15 @@ export class PhysicsCollection extends BaseCollection {
     this.rigidbodyLookup = new Map()
     this.colliderLookup = new Map()
     this.characterLookup = new Map()
-    this.kinematicSet = new Set()
+    this.exogenousShapes = new Set()
     this.simStart()
   }
 
   override onAdd(shapes: TLShape[]) {
     const parentShapes = new Set<TLParentId>()
     for (const shape of shapes) {
-      if ('graph' in shape.meta) this.kinematicSet.add(shape.id)
+      if (shape.type === 'arrow') continue;
+      if ('graph' in shape.meta) this.exogenousShapes.add(shape.id)
       if (shape.parentId !== 'page:page') {
         parentShapes.add(shape.parentId)
         continue;
@@ -82,7 +83,7 @@ export class PhysicsCollection extends BaseCollection {
 
   override onRemove(shapes: TLShape[]) {
     for (const shape of shapes) {
-      this.kinematicSet.delete(shape.id)
+      this.exogenousShapes.delete(shape.id)
       if (this.rigidbodyLookup.has(shape.id)) {
         const rb = this.rigidbodyLookup.get(shape.id);
         if (!rb) continue;
@@ -106,8 +107,8 @@ export class PhysicsCollection extends BaseCollection {
 
   override onShapeChange(prev: TLShape, next: TLShape) {
     if (prev.meta !== next.meta) {
-      if ('graph' in next.meta) this.kinematicSet.add(next.id)
-      else this.kinematicSet.delete(next.id)
+      if ('graph' in next.meta) this.exogenousShapes.add(next.id)
+      else this.exogenousShapes.delete(next.id)
     }
     // @ts-ignore
     if (prev.props.color !== next.props.color) {
@@ -364,6 +365,7 @@ export class PhysicsCollection extends BaseCollection {
       if (!rb.userData) return;
       const userData = rb.userData as RigidbodyUserData;
       if (this.editor.getSelectedShapeIds().includes(userData.id)) return
+      if (this.exogenousShapes.has(userData.id)) return;
 
       rb.setBodyType(userData.rbType, true);
       const position = rb.translation();
@@ -388,10 +390,9 @@ export class PhysicsCollection extends BaseCollection {
   }
 
   updateKinematic() {
-    const kinematicSet = new Set(this.kinematicSet)
-    for (const id of this.editor.getSelectedShapeIds())
-      kinematicSet.add(id)
-    for (const id of kinematicSet) {
+    const kinematicShapes = new Set([...this.exogenousShapes, ...this.editor.getSelectedShapeIds()]);
+
+    for (const id of kinematicShapes) {
       const shape = this.editor.getShape(id);
       if (!shape) continue
       const col = this.colliderLookup.get(id);
@@ -408,6 +409,7 @@ export class PhysicsCollection extends BaseCollection {
 
       // TODO: update dimensions for all shapes
       if (col && rb) {
+
         const userData = rb.userData as RigidbodyUserData;
         if (!rb.isKinematic()) rb.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, true);
         rb.setNextKinematicTranslation({ x: centerPos.x, y: centerPos.y });
