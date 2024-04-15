@@ -89,7 +89,7 @@ export const ToolbarUi = track(() => {
     <div className="custom-layout">
       <div className="custom-toolbar">
         <div>
-          <span>{physicsSize} shapes</span>
+          <span>{physicsSize} in physics</span>
           <button
             type="button"
             title="Add Selected"
@@ -139,7 +139,7 @@ export const ToolbarUi = track(() => {
           >
             🔦
           </button>
-          <div>{graphSize} shapes</div>
+          <div>{graphSize} in graph</div>
         </div>
       </div>
     </div>
