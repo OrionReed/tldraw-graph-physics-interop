@@ -1,8 +1,7 @@
 {
-  "name": "tldraw-physics",
+  "name": "tldraw-graph-physics-interop",
   "private": true,
   "version": "0.0.1",
-  "homepage": "https://OrionReed.github.io/tldraw-physics",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"HOST=localhost PORT=1234 npx y-websocket\" --kill-others",
